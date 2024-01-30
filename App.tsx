@@ -17,13 +17,6 @@ import {
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
 import {NavigationContainer, Theme, DefaultTheme, DarkTheme} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Onboarding from './src/pages/Onboarding';
@@ -46,6 +39,7 @@ function App(): React.JSX.Element {
       colorScheme === "dark" ? themes.colors.text ="#FFFBF5" : themes.colors.text="#040D12"
       colorScheme === "dark" ? themes.colors.primary ="#183D3D" : themes.colors.primary="#F7EFE5"
       colorScheme === "dark" ? themes.colors.border ="#5C8374" : themes.colors.border="#C3ACD0"
+      colorScheme === "dark" ? themes.colors.notification = "#183D3D": themes.colors.notification = "#7743DB"
       return themes;
     },
     [colorScheme]

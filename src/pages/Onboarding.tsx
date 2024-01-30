@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import {NavigationContainer, useTheme} from '@react-navigation/native';
+import { useTheme} from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import LButton from '../components/LButton';
 
 const Onboarding = ({navigation}:any) => {
     const theme = useTheme();
@@ -18,9 +19,7 @@ const Onboarding = ({navigation}:any) => {
                 <Text style={{color: theme.colors.text, ...styles.month}}>{monthName}</Text>
                 <Text style={{color: theme.colors.text, ...styles.year}}>{year}</Text>
             </View>
-            <View style={styles.footer}>
-                <TouchableOpacity style={{backgroundColor:theme.colors.card, ...styles.button}} onPress={()=>{navigation.navigate("TabNavigations")}}><Text style={{color: theme.colors.primary, ...styles.buttontxt}}>Today's Tasks</Text></TouchableOpacity>
-            </View>
+            <LButton theme={theme} navigateTo={()=>{navigation.navigate("TabNavigations")}} context={"Today's Tasks"}/>
         </SafeAreaView>
     )
 }
