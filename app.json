@@ -1,4 +1,5 @@
 {
   "name": "ToDo",
-  "displayName": "ToDo"
+  "displayName": "ToDo",
+  "userInterfaceStyle": "automatic"
 }

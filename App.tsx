@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -24,77 +24,114 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import {NavigationContainer, Theme, DefaultTheme, DarkTheme} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import Onboarding from './src/pages/Onboarding';
+import TabNavigations from './src/navigation/TabNavigations';
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+// type SectionProps = PropsWithChildren<{
+//   title: string;
+// }>;
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const Stack = createNativeStackNavigator();
 
 function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const colorScheme = useColorScheme();
+  const theme:Theme = useMemo(
+    ()=>{
+      const themes = colorScheme === "dark" ? DarkTheme : DefaultTheme
+      colorScheme === "dark" ? themes.colors.card ="#93B1A6" : themes.colors.card="#7743DB"
+      colorScheme === "dark" ? themes.colors.background ="#040D12" : themes.colors.background="#FFFBF5"
+      colorScheme === "dark" ? themes.colors.text ="#FFFBF5" : themes.colors.text="#040D12"
+      colorScheme === "dark" ? themes.colors.primary ="#183D3D" : themes.colors.primary="#F7EFE5"
+      colorScheme === "dark" ? themes.colors.border ="#5C8374" : themes.colors.border="#C3ACD0"
+      return themes;
+    },
+    [colorScheme]
+  );
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+    <NavigationContainer theme={theme}>
+        <Stack.Navigator>
+        <Stack.Screen
+          name="Onboarding"
+          component={Onboarding}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen name="TabNavigations" component={TabNavigations} options={{headerShown: false}}/>
+      </Stack.Navigator>
+    </NavigationContainer>
+  )
 }
+
+// function Section({children, title}: SectionProps): React.JSX.Element {
+//   const isDarkMode = useColorScheme() === 'dark';
+//   return (
+//     <View style={styles.sectionContainer}>
+//       <Text
+//         style={[
+//           styles.sectionTitle,
+//           {
+//             color: isDarkMode ? Colors.white : Colors.black,
+//           },
+//         ]}>
+//         {title}
+//       </Text>
+//       <Text
+//         style={[
+//           styles.sectionDescription,
+//           {
+//             color: isDarkMode ? Colors.light : Colors.dark,
+//           },
+//         ]}>
+//         {children}
+//       </Text>
+//     </View>
+//   );
+// }
+
+// function App(): React.JSX.Element {
+//   const isDarkMode = useColorScheme() === 'dark';
+
+//   const backgroundStyle = {
+//     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+//   };
+
+//   return (
+//     <SafeAreaView style={backgroundStyle}>
+//       <StatusBar
+//         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+//         backgroundColor={backgroundStyle.backgroundColor}
+//       />
+//       <ScrollView
+//         contentInsetAdjustmentBehavior="automatic"
+//         style={backgroundStyle}>
+//         <Header />
+//         <MainPage />
+//         <View
+//           style={{
+//             backgroundColor: isDarkMode ? Colors.black : Colors.white,
+//           }}>
+//           <Section title="Step One">
+//             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
+//             screen and then come back to see your edits.
+//           </Section>
+//           <Section title="See Your Changes">
+//             <ReloadInstructions />
+//           </Section>
+//           <Section title="Debug">
+//             <DebugInstructions />
+//           </Section>
+//           <Section title="Learn More">
+//             Read the docs to discover what to do next:
+//           </Section>
+//           <LearnMoreLinks />
+//         </View>
+//       </ScrollView>
+//     </SafeAreaView>
+//   );
+// }
 
 const styles = StyleSheet.create({
   sectionContainer: {
