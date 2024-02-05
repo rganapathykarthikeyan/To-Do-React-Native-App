@@ -4,6 +4,7 @@ import { createContext } from "react";
 export interface task {
     taskName: string,
     taskId: number,
+    description: string,
     taskCreatedDate: Date,
     taskEndDate: Date,
     reapeatable: boolean,
