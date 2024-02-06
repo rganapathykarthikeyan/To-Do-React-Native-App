@@ -9,6 +9,7 @@ export interface task {
     taskEndDate: Date,
     reapeatable: boolean,
     points: number,
+    completed: boolean,
 }
 
 const taskList:task[] = []
