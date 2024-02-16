@@ -12,7 +12,6 @@ import { TaskContext } from '../store/tasksContext';
 
 const AddTodos = ({ navigation }: any) => {
   const theme = useTheme();
-  const [task, setTask] = useState<task>()
   const [endDate, setendDate] = useState(new Date(Date.now()));
   const [repeat, setRepeat] = useState<boolean>(false);
   const [editTitle, setEditTitle] = useState<boolean>(true);
@@ -20,7 +19,10 @@ const AddTodos = ({ navigation }: any) => {
   const [desc, setDesc] = useState<string>("");
   const [points, setPoints] = useState<number>(1);
   const titleRef = useRef<TextInput>(null);
-  let timeout:any;
+  const desRef = useRef<TextInput>(null);
+  const pointRef = useRef<TextInput>(null);
+  const [open, setOpen] = useState(false);
+  let timeout: any;
 
   const context = useContext(TaskContext)
 
@@ -30,29 +32,33 @@ const AddTodos = ({ navigation }: any) => {
     }
   }, [editTitle]);
   const AddTask = () => {
-    if(title!==""){
-    const task: task = {
-      taskName: title,
-      taskId: Date.now(),
-      description: desc,
-      taskCreatedDate: new Date(Date.now()),
-      taskEndDate: endDate,
-      reapeatable: repeat,
-      points: points,
-      completed: false,
+    if (title !== "") {
+      const task: task = {
+        taskName: title,
+        taskId: Date.now(),
+        description: desc,
+        taskCreatedDate: new Date(Date.now()),
+        taskEndDate: endDate,
+        reapeatable: repeat,
+        points: points,
+        completed: false,
+      }
+      context.addTask(task);
+      context.checkUpdate();
+      console.log(task)
+      titleRef.current?.clear()
+      desRef.current?.clear()
+      pointRef.current?.clear()
+      setEditTitle(true)
+      setRepeat(false)
+      setTitle('')
+      setDesc("")
+      setPoints(1)
+      navigation.navigate("Today")
     }
-    context.addTask(task);
-    context.checkUpdate();
-    console.log(task)
-    setTitle('')
-    setDesc("")
-    setPoints(1)
-    setEditTitle(true)
-    navigation.navigate("Today")
-  }
-  else{
-    Alert.alert('Data incomplete','Task name not provided', [{text:'OK'}])
-  }
+    else {
+      Alert.alert('Data incomplete', 'Task name not provided', [{ text: 'OK' }])
+    }
   }
   return (
     <View style={styles.Container}>
@@ -62,15 +68,25 @@ const AddTodos = ({ navigation }: any) => {
       <View style={{ backgroundColor: theme.colors.border, ...styles.TaskContainer }}>
         <View style={styles.TitleContainer}>
           <TextInput ref={titleRef} style={[{ color: theme.colors.primary, borderColor: theme.colors.primary, ...styles.TaskTitle }, editTitle ? { 'borderBottomWidth': 1 } : { 'borderBottomWidth': 0 }]}
-            editable={editTitle} onBlur={() => { setEditTitle(false) }} placeholderTextColor={theme.colors.primary} placeholder="Add Task Title" onChangeText={(text) => { clearTimeout(timeout); timeout=setTimeout(()=>{setTitle(text)},300) }} />
+            editable={editTitle} onBlur={() => { setEditTitle(false) }} placeholderTextColor={theme.colors.primary} placeholder="Add Task Title" onChangeText={(text) => { clearTimeout(timeout); timeout = setTimeout(() => { setTitle(text) }, 300) }} />
           <TouchableOpacity onPress={() => { setEditTitle(true) }}><Edit height={35} width={35} color={theme.colors.primary} /></TouchableOpacity>
         </View>
-        <TextInput style={{ color: theme.colors.primary, borderColor: theme.colors.primary, ...styles.TextLine }} placeholderTextColor={theme.colors.primary} placeholder="Task Description" onChangeText={(text) => { clearTimeout(timeout); timeout=setTimeout(()=>{setDesc(text)},300) }}  />
-        <View>
-          <Text style={{ color: theme.colors.primary }}>Task DeadLine</Text>
-          <DatePicker date={endDate} onDateChange={setendDate} fadeToColor={theme.colors.border} textColor={theme.colors.primary} minimumDate={new Date(Date.now())} />
+        <TextInput ref={desRef} style={{ color: theme.colors.primary, borderColor: theme.colors.primary, ...styles.TextLine }} placeholderTextColor={theme.colors.primary} placeholder="Task Description" onChangeText={(text) => { clearTimeout(timeout); timeout = setTimeout(() => { setDesc(text) }, 300) }} />
+        <View style={{borderColor: theme.colors.primary, ...styles.datePicker}}>
+          <Text style={{ color: theme.colors.primary }}>Select DeadLine</Text>
+          <TouchableOpacity onPress={() => { setOpen(true) }} style={{ backgroundColor: theme.colors.card, ...styles.dateButton }}>
+            <Text style={{color: theme.colors.primary,}}> {endDate.toDateString()}</Text>
+          </TouchableOpacity>
+          <DatePicker modal open={open} date={endDate} onConfirm={(date) => {
+            setOpen(false)
+            setendDate(date)
+          }}
+            onCancel={() => {
+              setOpen(false)
+            }}
+            minimumDate={new Date(Date.now())} />
         </View>
-        <TextInput style={{ color: theme.colors.primary, borderColor: theme.colors.primary, ...styles.TextLine }} placeholderTextColor={theme.colors.primary} placeholder="Points for Task" keyboardType="numeric"  onChangeText={(text) => { clearTimeout(timeout); timeout=setTimeout(()=>{setPoints(+text)},300) }} />
+        <TextInput ref={pointRef} style={{ color: theme.colors.primary, borderColor: theme.colors.primary, ...styles.TextLine }} placeholderTextColor={theme.colors.primary} placeholder="Points for Task" keyboardType="numeric" onChangeText={(text) => { clearTimeout(timeout); timeout = setTimeout(() => { setPoints(+text) }, 300) }} />
         <View style={styles.ToggleContainer}>
           <Text style={{ color: theme.colors.primary, }}>Remind Task till Deadline</Text>
           <Switch
@@ -82,7 +98,7 @@ const AddTodos = ({ navigation }: any) => {
           />
         </View>
       </View>
-      <LButton theme={theme} navigateTo={() => { AddTask()}} context={"Add Task"} />
+      <LButton theme={theme} navigateTo={() => { AddTask() }} context={"Add Task"} />
     </View>
   )
 }
@@ -102,6 +118,20 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     width: "80%"
+  },
+  datePicker: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems:"center",
+    padding: 10,
+    margin:5,
+    borderWidth:0.5,
+    borderRadius:10
+  },
+  dateButton: {
+    padding: 10,
+    borderRadius: 15,
+    
   },
   title: {
     fontSize: 24,

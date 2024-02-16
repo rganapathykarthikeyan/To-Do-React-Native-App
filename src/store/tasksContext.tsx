@@ -18,7 +18,7 @@ export const TaskContext = createContext({
     tasksList: taskList,
     updatedList:true,
     checkUpdate:  () => {},
-    getTaskList: () => {},
+    getTaskList: (totalList:task[]) => {},
     addTask: (tasks:task) => {},
     removeTask: (taskid:number) => {},
 });

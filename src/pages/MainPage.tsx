@@ -5,6 +5,7 @@ import { TaskContext, task } from '../store/tasksContext';
 import TaskView from '../components/TaskView';
 
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import DoubleTick from '../assets/doubleTick.svg'
 import Future from '../assets/future.svg'
@@ -13,27 +14,98 @@ import ModalComp from '../components/ModalComp';
 const MainPage = () => {
   const theme = useTheme();
   const context = useContext(TaskContext);
+  
+  const [allTasks, setAllTasks] = useState<task[]>([])
   const [todayList, setTodayList] = useState<task[]>([])
+  const [completedList, setCompletedList] = useState<task[]>([])
+  const [tCompletedList, setTCompletedList] = useState<task[]>([])
+  const [futureList, setFutureList] = useState<task[]>([])
+  const [dueList, setDueList] = useState<task[]>([])
   const [modalVisible, setModalVisible] = useState(false);
-  const background = theme.dark ? "#040d129f" : "#fffbf5a2";
-  const modalColor = theme.dark ? "#183d3dad" : "#7843dbad";
   const [compOrFuct, setCompOrFuct] = useState<string>("Completed")
 
   useFocusEffect(
     React.useCallback(() => {
       if (context.updatedList) {
-        setTodayList(context.tasksList)
+        setAllTasks(context.tasksList)
         console.log("Done")
         context.checkUpdate()
       }
       console.log("here")
-    }, [context.updatedList])
+    }, [context.updatedList, modalVisible])
   )
+  
+  const filterTasks = () =>{
+    const tl:task[] =[];
+    const cl:task[] =[];
+    const fl:task[] =[];
+    const dl:task[] = [];
+    const ctl:task[] = [];
+    allTasks.map(task => {
+      console.log(task.taskName, task.taskEndDate)
+      if(task.completed && task.taskEndDate < new Date(new Date().getTime() + (24 * 60 * 60 * 1000))){
+        context.removeTask(task.taskId);
+      }
+      else if(task.completed && ((task.taskEndDate === new Date(Date.now())) || task.reapeatable )){
+        ctl.push(task);
+      }
+      else if(task.completed){
+        cl.push(task);
+      }
+      else if(task.taskEndDate<new Date(Date.now())){
+        dl.push(task);
+      }
+      else if(task.taskEndDate===new Date(Date.now())){
+        tl.push(task);
+      }
+      else if(task.reapeatable === true){
+        tl.push(task);
+      }
+      else{
+        fl.push(task);
+      }
+    })
+    console.log(ctl);
+    setTodayList(tl);
+    setCompletedList(cl);
+    setFutureList(fl);
+    setDueList(dl);
+    setTCompletedList(ctl)
+  }
+
+  const setData = () => {
+    const allTasksS = JSON.stringify(allTasks);
+    AsyncStorage.setItem('TaskList', allTasksS);
+  }
+
+  const updateCompleted = (taskId:number, taskState:boolean) =>{
+    const findIndex = allTasks.findIndex(task => task.taskId === taskId);
+    allTasks[findIndex].completed = taskState;
+    setData();
+    filterTasks();
+  }
+
+  const getData = async() =>{
+    const totalList = await AsyncStorage.getItem('TaskList');
+    let allTasks = [];
+        if (typeof totalList === 'string') {
+            allTasks = JSON.parse(totalList)
+        }
+    context.getTaskList(allTasks);
+    setAllTasks(allTasks)
+  }
+
+  useEffect(()=>{
+    filterTasks();
+  },[allTasks])
 
   useEffect(() => {
-    context.getTaskList();
-    setTodayList(context.tasksList)
+    getData();
   }, [])
+
+  const deleteTask = (taskid:number) => {
+    context.removeTask(taskid)
+  }
 
   return (
     <View style={styles.Container}>
@@ -42,7 +114,8 @@ const MainPage = () => {
       </View>
       <View style={styles.body}>
         <ScrollView>
-          {todayList.map(task => <TaskView task={task} key={task.taskId} />)}
+          {todayList.map(task => <TaskView task={task} key={task.taskId} complete={false} deleteTask={deleteTask} update={updateCompleted}/>)}
+          {tCompletedList.map(task => <TaskView task={task} key={task.taskId} complete={true} deleteTask={deleteTask} update={updateCompleted}/>)}
         </ScrollView>
       </View>
       <View style={styles.notify}>
@@ -68,23 +141,7 @@ const MainPage = () => {
           <Future height={20} width={20} color={theme.colors.card} />
         </TouchableOpacity>
       </View>
-      <ModalComp modalVisible={modalVisible} setModalVisible={setModalVisible} compOrFuct={compOrFuct} taskList={todayList}/>
-      {/* <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(false);
-        }}>
-        <Pressable onPress={(event) => event.target == event.currentTarget && setModalVisible(false)} style={{ backgroundColor: background, flex: 1 }}>
-          <View style={{ backgroundColor: modalColor, opacity: 0.8, height: "90%", width: "100%", marginTop: "20%", borderRadius: 40 }}>
-            <Text>{compOrFuct}</Text>
-            <ScrollView>
-              {todayList.map(task => <TaskView task={task} key={task.taskId} />)}
-            </ScrollView>
-          </View>
-        </Pressable>
-      </Modal> */}
+      <ModalComp modalVisible={modalVisible} setModalVisible={setModalVisible} compOrFuct={compOrFuct} taskList={allTasks} deleteTask={deleteTask} update={updateCompleted}/>
     </View>
   )
 }

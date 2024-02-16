@@ -9,6 +9,7 @@ const ModalComp = (props:any) => {
     const background = theme.dark ? "#040d129f" : "#fffbf5a2";
     const modalColor = theme.dark ? "#183d3dad" : "#7843dbad";
     const List:task[] = props.taskList;
+    const comp = (props.compOrFuct === "Completed") ? true:false;
   return (
     <Modal
         animationType="slide"
@@ -22,7 +23,7 @@ const ModalComp = (props:any) => {
           <View style={{ backgroundColor: modalColor, opacity: 0.8, height: "90%", width: "100%", marginTop: "20%", borderRadius: 40 }}>
             <Text>{props.compOrFuct}</Text>
             <ScrollView>
-              {List.map(task => <TaskView task={task} key={task.taskId} />)}
+              {List.map(task => <TaskView task={task} key={task.taskId} deleteTask={props.deleteTask} update={props.update} complete={comp}/>)}
             </ScrollView>
           </View>
         </Pressable>
